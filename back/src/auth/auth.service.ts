@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { UsersService } from "../users/users.service";
@@ -12,6 +16,9 @@ export class AuthService {
   ) {}
 
   async login(userLogin: AuthLoginDto) {
+    if (!userLogin.email || !userLogin.password)
+      throw new NotFoundException(["Email and password are required"]);
+
     const user = await this.usersService.findOneByEmail(userLogin.email);
     if (!user) throw new UnauthorizedException();
 

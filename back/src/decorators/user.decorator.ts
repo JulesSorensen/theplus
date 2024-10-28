@@ -18,8 +18,10 @@ const UserInfos = createParamDecorator(
 
         if (request.headers["x-access-token"]) { return null; }
 
+        if (!request.headers.authorization) { return null; }
+
         const jwt = request.headers.authorization.startsWith('Bearer ') ? request.headers.authorization.slice(7, request.headers.authorization.length) : request.headers.authorization;
-        
+
         const payload = parseJwt(jwt);
 
         return {
@@ -29,4 +31,5 @@ const UserInfos = createParamDecorator(
     },
 );
 
-export { UserInfos, IUserInfos };
+export { IUserInfos, UserInfos };
+

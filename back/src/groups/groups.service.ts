@@ -100,6 +100,36 @@ export class GroupsService {
     const groups = await this.groupsRepository
       .createQueryBuilder("group")
       .where("group.id IN (:...ids)", { ids: groupIds })
+      .leftJoinAndSelect("group.groupsUsers", "groupsUsers")
+      .leftJoinAndSelect("groupsUsers.user", "user")
+      .getMany();
+
+    return groups.map((c) => ({
+      ...c,
+      groupsUsers: c.groupsUsers.map((c) => {
+        delete c.user.password;
+        delete c.user.email;
+        delete c.user.createdAt;
+        delete c.user.updatedAt;
+
+        return c;
+      }),
+    }));
+  }
+
+  async findAllOfUser(userId: number) {
+    const groupsOfUser = await this.groupsUsersRepository.find({
+      where: { user: { id: userId } },
+      relations: ["group"],
+    });
+
+    const groupIds = groupsOfUser.map((c) => c.group.id);
+
+    const groups = await this.groupsRepository
+      .createQueryBuilder("group")
+      .where("group.id IN (:...ids)", { ids: groupIds })
+      .leftJoinAndSelect("group.groupsUsers", "groupsUsers")
+      .leftJoinAndSelect("groupsUsers.user", "user")
       .getMany();
 
     return groups;

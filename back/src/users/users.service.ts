@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
+import { classToPlain } from "class-transformer";
 import { IUserInfos } from "src/decorators/user.decorator";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -13,7 +14,7 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
     const user = this.usersRepository.create({
       ...createUserDto,
       password: bcrypt.hashSync(createUserDto.password, 8),
@@ -34,11 +35,30 @@ export class UsersService {
     const newUser = await this.usersRepository.save(user);
     delete newUser.password;
 
-    return newUser;
+    return classToPlain(newUser);
+  }
+
+  async findAllByIds(ids: number[]): Promise<User[]> {
+    return await this.usersRepository.findByIds(ids);
+  }
+
+  async findOneById(id: number): Promise<User> {
+    return await this.usersRepository.findOneBy({ id });
   }
 
   async findOneByEmail(email: string): Promise<User> {
     return await this.usersRepository.findOneBy({ email });
+  }
+
+  async findAll() {
+    const users = await this.usersRepository.find();
+    return users.map((user) => {
+      delete user.password;
+      delete user.email;
+      delete user.createdAt;
+      delete user.updatedAt;
+      return user;
+    });
   }
 
   async update(updateUserDto: UpdateUserDto, user: IUserInfos) {

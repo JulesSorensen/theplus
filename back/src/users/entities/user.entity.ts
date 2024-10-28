@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Message } from "src/messages/entities/message.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("users")
 export class User {
@@ -13,4 +14,13 @@ export class User {
 
   @Column({ length: 500 })
   password: string;
+
+  @OneToMany(() => Message, (message) => message.user)
+  messages: Message[];
+
+  @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }

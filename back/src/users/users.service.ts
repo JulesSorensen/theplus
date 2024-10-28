@@ -19,11 +19,17 @@ export class UsersService {
       password: bcrypt.hashSync(createUserDto.password, 8),
     });
 
-    const existingUser = await this.usersRepository.findBy({
+    const existingEmail = await this.usersRepository.findBy({
       email: user.email,
     });
-    if (existingUser.length > 0)
+    if (existingEmail.length > 0)
       throw new ForbiddenException(["Email already used"]);
+
+    const existingUsername = await this.usersRepository.findBy({
+      name: user.name,
+    });
+    if (existingUsername.length > 0)
+      throw new ForbiddenException(["Username already used"]);
 
     const newUser = await this.usersRepository.save(user);
     delete newUser.password;
@@ -32,9 +38,7 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string): Promise<User> {
-    const user = await this.usersRepository.findBy({ email });
-
-    return user[0];
+    return await this.usersRepository.findOneBy({ email });
   }
 
   async update(updateUserDto: UpdateUserDto, user: IUserInfos) {

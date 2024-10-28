@@ -1,33 +1,46 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, Pressable } from 'react-native';
+import { register } from '../services/register';
+import { login } from '../services/login';
+
 
 const RegisterScreen = ({ navigation }) => {
 
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+  const createUserInBDDViaAPIURL = async () => {
+    try {
+      await register({ email: email, name: name, password: password })
+      const jwt = await login({email,password})
+      await AsyncStorage.setItem("jwt",jwt.access_token)
+      console.log(jwt)
+    } catch (error) {
+      console.log({error})
+    }
+  }
 
   return (
     <View style={styles.container}>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email :</Text>
-        <TextInput style={styles.input} placeholder='Entrez votre email' onChange={setEmail} value={email} />
+        <TextInput style={styles.input} placeholder='Entrez votre email' onChangeText={setEmail} value={email} />
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Nom utilisateur :</Text>
-        <TextInput style={styles.input} placeholder='Entrez votre nom utilisateur' onChange={setName} value={name} />
+        <TextInput style={styles.input} placeholder='Entrez votre nom utilisateur' onChangeText={setName} value={name} />
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Mot de passe :</Text>
-        <TextInput style={styles.input} placeholder='Entrez votre mot de passe' onChange={setPassword} value={password} secureTextEntry passwordRules={/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).+$/} />
+        <TextInput style={styles.input} placeholder='Entrez votre mot de passe' onChangeText={setPassword} value={password} secureTextEntry passwordRules={/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).+$/} />
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="Allons y" />
-        <Pressable  onPress={() => navigation.navigate('Login')}>
+        <Button title="Allons y" onPress={createUserInBDDViaAPIURL} />
+        <Pressable onPress={() => navigation.navigate('Login')}>
           <Text> J'ai déjà un compte</Text>
         </Pressable>
       </View>
@@ -53,12 +66,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   label: {
-    width: 120,         
+    width: 120,
     fontSize: 16,
     fontWeight: 'bold',
   },
   input: {
-    flex: 1,             
+    flex: 1,
     height: 40,
     paddingHorizontal: 10,
   },

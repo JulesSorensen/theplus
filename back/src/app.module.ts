@@ -5,6 +5,7 @@ import configuration from "../config/configuration";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
+import { MessagesModule } from "./messages/messages.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
@@ -21,6 +22,7 @@ import { UsersModule } from "./users/users.module";
     }),
     AuthModule,
     UsersModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

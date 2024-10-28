@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, Pressable } from 'react-native';
 import { register } from '../services/register';
-import { login } from '../services/login';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loginInApp } from '../services/login';
+
 
 
 const RegisterScreen = ({ navigation }) => {
@@ -13,10 +13,10 @@ const RegisterScreen = ({ navigation }) => {
   const createUserInBDDViaAPIURL = async () => {
     try {
       await register({ email: email, name: name, password: password })
-      const jwt = await login({email,password})
-      await AsyncStorage.setItem("jwt",jwt.access_token)
+      await loginInApp(email, password)
+      console.log("ouf")
     } catch (error) {
-      console.log({error})
+      console.log({ error })
     }
   }
 
@@ -35,7 +35,7 @@ const RegisterScreen = ({ navigation }) => {
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Mot de passe :</Text>
-        <TextInput style={styles.input} placeholder='Entrez votre mot de passe' onChangeText={setPassword} value={password} secureTextEntry passwordRules={/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).+$/} />
+        <TextInput style={styles.input} placeholder='Entrez votre mot de passe' onChangeText={setPassword} value={password} secureTextEntry />
       </View>
 
       <View style={styles.buttonContainer}>

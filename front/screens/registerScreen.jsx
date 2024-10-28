@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, Pressable } from 'react-native';
 import { register } from '../services/register';
 import { login } from '../services/login';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const RegisterScreen = ({ navigation }) => {
@@ -14,7 +15,6 @@ const RegisterScreen = ({ navigation }) => {
       await register({ email: email, name: name, password: password })
       const jwt = await login({email,password})
       await AsyncStorage.setItem("jwt",jwt.access_token)
-      console.log(jwt)
     } catch (error) {
       console.log({error})
     }

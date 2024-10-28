@@ -5,6 +5,8 @@ import configuration from "../config/configuration";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
+import { GroupsModule } from "./groups/groups.module";
+import { InvitsModule } from "./invits/invits.module";
 import { MessagesModule } from "./messages/messages.module";
 import { UsersModule } from "./users/users.module";
 
@@ -23,6 +25,8 @@ import { UsersModule } from "./users/users.module";
     AuthModule,
     UsersModule,
     MessagesModule,
+    GroupsModule,
+    InvitsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

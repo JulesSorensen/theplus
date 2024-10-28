@@ -1,3 +1,4 @@
+import { Group } from "src/groups/entities/group.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -11,6 +12,9 @@ export class Message {
 
   @ManyToOne(() => User, (user) => user.messages)
   user: User;
+
+  @ManyToOne(() => Group, (group) => group.messages)
+  group?: Group;
 
   @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;

@@ -1,12 +1,13 @@
 import { UnauthorizedException } from "@nestjs/common";
 import {
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    WebSocketGateway,
-    WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  WebSocketGateway,
+  WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { AuthService } from "src/auth/auth.service";
+import { User } from "src/users/entities/user.entity";
 
 @WebSocketGateway({
   cors: {
@@ -44,9 +45,10 @@ export class MessagesGateway
     this.clients.delete(client.data.user.id);
   }
 
-  sendMessage(message: any) {
+  sendMessage(message: any, members?: User[]) {
     for (const client of this.clients.values()) {
-      if (message.user?.id == client.user.id) continue;
+      if (message.user?.id == client.user.id) continue; // Do not send message to the himself
+      if (members && !members.some((m) => m.id == client.user.id)) continue; // Do not send message to unauthorized users
 
       client.socket.emit("message", message);
     }

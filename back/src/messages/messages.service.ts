@@ -1,6 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IUserInfos } from "src/decorators/user.decorator";
+import { GroupsService } from "src/groups/groups.service";
+import { User } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import { Message } from "./entities/message.entity";
@@ -10,6 +12,7 @@ import { MessagesGateway } from "./messages.gateway";
 export class MessagesService {
   constructor(
     @InjectRepository(Message) private usersRepository: Repository<Message>,
+    @Inject(GroupsService) private groupsService: GroupsService,
     private messagesGateway: MessagesGateway,
   ) {}
 
@@ -21,9 +24,20 @@ export class MessagesService {
       },
     };
 
-    const msg = await this.usersRepository.save(messageToCreate);
+    let members: Partial<User[]> | any | undefined = undefined;
+    if (createMessageDto.groupId) {
+      const groups = await this.groupsService.findAllOfUser(author.id);
+      if (!groups) throw new Error("Group not found");
 
-    this.messagesGateway.sendMessage(msg);
+      const group = groups.find((g) => g.id === createMessageDto.groupId);
+      if (!group) throw new Error("Group not found");
+
+      members = group.groupsUsers.map((gu) => ({ id: gu.user.id }));
+      messageToCreate.group = { id: createMessageDto.groupId };
+    }
+
+    const msg = await this.usersRepository.save(messageToCreate);
+    this.messagesGateway.sendMessage(msg, members);
 
     return msg;
   }
@@ -36,8 +50,14 @@ export class MessagesService {
   }
 
   async findAll(query: any) {
+    const dbQuery = {};
+
+    if (query.name) {
+      dbQuery["name"] = query.name;
+    }
+
     return this.usersRepository.find({
-      where: { ...query, deletedAt: null },
+      where: { ...dbQuery, deletedAt: null },
       relations: ["user"],
     });
   }

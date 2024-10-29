@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as sha256 from "sha256";
 import { IUserInfos } from "src/decorators/user.decorator";
 import { GroupsService } from "src/groups/groups.service";
 import { User } from "src/users/entities/user.entity";
@@ -11,7 +12,7 @@ import { MessagesGateway } from "./messages.gateway";
 @Injectable()
 export class MessagesService {
   constructor(
-    @InjectRepository(Message) private usersRepository: Repository<Message>,
+    @InjectRepository(Message) private messageRepository: Repository<Message>,
     @Inject(GroupsService) private groupsService: GroupsService,
     private messagesGateway: MessagesGateway,
   ) {}
@@ -36,29 +37,55 @@ export class MessagesService {
       messageToCreate.group = { id: createMessageDto.groupId };
     }
 
-    const msg = await this.usersRepository.save(messageToCreate);
+    const msg = await this.messageRepository.save(messageToCreate);
+
+    msg.user = {
+      id: author.id,
+      name: author.name,
+      hashedName: sha256(author.name),
+    };
+
     this.messagesGateway.sendMessage(msg, members);
 
     return msg;
   }
 
   async findOne(id: number) {
-    return this.usersRepository.findOne({
+    return this.messageRepository.findOne({
       where: { id },
       relations: ["user"],
     });
   }
 
   async findAll(query: any) {
-    const dbQuery = {};
+    const queryBuilder = this.messageRepository
+      .createQueryBuilder("message")
+      .leftJoinAndSelect("message.user", "user")
+      .leftJoinAndSelect("message.group", "group")
+      .where("message.deletedAt IS NULL");
 
     if (query.name) {
-      dbQuery["name"] = query.name;
+      queryBuilder.andWhere("user.name = :name", { name: query.name });
     }
 
-    return this.usersRepository.find({
-      where: { ...dbQuery, deletedAt: null },
-      relations: ["user"],
+    if (query.groupId) {
+      queryBuilder.andWhere("group.id = :groupId", { groupId: query.groupId });
+    } else {
+      queryBuilder.andWhere("message.groupId IS NULL");
+    }
+
+    const msgs = await queryBuilder.getMany();
+
+    return msgs.map((msg) => {
+      return {
+        ...msg,
+        user: {
+          id: msg.user.id,
+          name: msg.user.name,
+          hashedName: sha256(msg.user.name),
+          email: msg.user.email,
+        },
+      };
     });
   }
 
@@ -72,7 +99,7 @@ export class MessagesService {
       throw new Error("You are not allowed to delete this message");
 
     message.deletedAt = new Date();
-    await this.usersRepository.save(message);
+    await this.messageRepository.save(message);
 
     return true;
   }

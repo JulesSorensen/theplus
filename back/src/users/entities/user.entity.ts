@@ -10,6 +10,8 @@ export class User {
   @Column({ length: 20 })
   name: string;
 
+  hashedName: string;
+
   @Column({ length: 100, unique: true })
   email: string;
 

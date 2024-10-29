@@ -42,7 +42,7 @@ export class MessagesGateway
   }
 
   handleDisconnect(client: Socket) {
-    this.clients.delete(client.data.user.id);
+    this.clients.delete(client.data?.user?.id);
   }
 
   sendMessage(message: any, members?: User[]) {

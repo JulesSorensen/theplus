@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 interface IUserInfos {
     id: number
-    username: string
+    name: string
     email: string
     jwt: string
 }

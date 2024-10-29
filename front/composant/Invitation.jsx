@@ -4,8 +4,9 @@ import {
     Text,
     View,
     Pressable,
-    StyleSheet
+    StyleSheet,
 } from "react-native";
+import Toast from 'react-native-toast-message';
 import { getInvits, setInvit } from "../services/invitation";
 
 
@@ -34,10 +35,18 @@ export default function Invitation() {
         }
     }
 
-    const responseInvit= async(id,statut)=>{
-        await setInvit(id,statut)
+    const responseInvit = async (id, statut, action) => {
+        await setInvit(id, statut)
         await loadInvits()
+        showToast(action)
     }
+
+    const showToast = (action) => {
+        Toast.show({
+            type: 'info',
+            text1: `${action} confirmée`,
+        });
+    };
 
     const renderItem = ({ item }) => (
         <View>
@@ -46,14 +55,14 @@ export default function Invitation() {
                 <View>
                     <Pressable
                         style={[styles.button, styles.buttonValide]}
-                        onPress={() => responseInvit(item.id,200)}>
+                        onPress={() => responseInvit(item.id, 200, "Validation")}>
                         <Text>V</Text>
                     </Pressable>
                 </View>
                 <View>
                     <Pressable
                         style={[styles.button, styles.buttonRefus]}
-                        onPress={() => responseInvit(item.id,300)}>
+                        onPress={() => responseInvit(item.id, 300, "Suppression")}>
                         <Text>X</Text>
                     </Pressable>
                 </View>
@@ -87,12 +96,12 @@ const styles = StyleSheet.create({
         padding: 10,
         elevation: 2,
     },
-    buttonValide:{
+    buttonValide: {
         color: "white",
         textAlign: 'center',
         backgroundColor: 'green'
     },
-    buttonRefus:{
+    buttonRefus: {
         color: "white",
         textAlign: 'center',
         backgroundColor: 'red'

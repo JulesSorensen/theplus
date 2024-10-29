@@ -18,6 +18,7 @@ import { getMessages, publishMessages } from "../services/messages";
 import { getPseudoFromToken, getUser } from "../utils/authUtils";
 import { getSocket } from "../services/socket";
 import Invitation from "../composant/Invitation";
+import Toast from "react-native-toast-message";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -265,6 +266,7 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+        <Toast/>
       </View>
     </SafeAreaView>
   );

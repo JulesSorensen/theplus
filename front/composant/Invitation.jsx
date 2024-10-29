@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
     FlatList,
     Text,
-    View
+    View,
+    Pressable,
+    StyleSheet
 } from "react-native";
-import { getInvits } from "../services/invitation";
+import { getInvits, setInvit } from "../services/invitation";
 
 
 export default function Invitation() {
@@ -32,11 +34,30 @@ export default function Invitation() {
         }
     }
 
+    const responseInvit= async(id,statut)=>{
+        await setInvit(id,statut)
+        await loadInvits()
+    }
+
     const renderItem = ({ item }) => (
         <View>
-            <Text>
-                <Text>{item.sender.name} vous a invité dans le groupe {item.group.name}</Text>
-            </Text>
+            <Text>{item.sender.name} vous a invité dans le groupe {item.group.name}</Text>
+            <View style={styles.containerButton}>
+                <View>
+                    <Pressable
+                        style={[styles.button, styles.buttonValide]}
+                        onPress={() => responseInvit(item.id,200)}>
+                        <Text>V</Text>
+                    </Pressable>
+                </View>
+                <View>
+                    <Pressable
+                        style={[styles.button, styles.buttonRefus]}
+                        onPress={() => responseInvit(item.id,300)}>
+                        <Text>X</Text>
+                    </Pressable>
+                </View>
+            </View>
         </View>
     );
 
@@ -55,4 +76,27 @@ export default function Invitation() {
     );
 
 }
+
+const styles = StyleSheet.create({
+    containerButton: {
+        flexDirection: "row",
+        justifyContent: 'center',
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonValide:{
+        color: "white",
+        textAlign: 'center',
+        backgroundColor: 'green'
+    },
+    buttonRefus:{
+        color: "white",
+        textAlign: 'center',
+        backgroundColor: 'red'
+    }
+
+})
 

@@ -148,7 +148,6 @@ const HomeScreen = () => {
   const initSocket = async () => {
     const socket = await getSocket();
     socket.on("message", (message) => {
-      console.log("Message reçu :", message);
       messageRef.current = [...messageRef.current, message];
       setMessages([...messageRef.current]);
     });
@@ -252,6 +251,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingTop: 20,
   },
   burgerButton: {
     position: "absolute",
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
     width: 250,
     backgroundColor: "#ffffff",
     padding: 20,
-    elevation: 5,
   },
   menuTitle: {
     fontSize: 24,
@@ -332,7 +331,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 10,
     padding: 10,
-    elevation: 3,
   },
   chatTitle: {
     paddingLeft: 20,

@@ -10,11 +10,14 @@ import {
   SafeAreaView,
   Pressable,
   Image,
+  Button,
+  Modal
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { getMessages, publishMessages } from "../services/messages";
 import { getPseudoFromToken, getUser } from "../utils/authUtils";
 import { getSocket } from "../services/socket";
+import Invitation from "../composant/Invitation";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -29,6 +32,7 @@ const HomeScreen = () => {
   const menuAnimation = useState(new Animated.Value(-250))[0];
   const [myPseudo, setMyPseudo] = useState(null);
   const [user, setUser] = useState();
+  const [showModal, setShowModal] = useState(false);
 
   const fetchMessages = async () => {
     try {
@@ -213,6 +217,28 @@ const HomeScreen = () => {
 
         <View style={styles.chatContainer}>
           <Text style={styles.chatTitle}>Chat global</Text>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showModal}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Invitation />
+                <View style={styles.viewButton} >
+                  <View>
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress={() => setShowModal(!showModal)}>
+                      <Text style={styles.textSuppr}>X</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+          </Modal>
+          <Button title="Notification" onPress={() => setShowModal(true)}></Button>
           {messages !== undefined ? (
             <FlatList
               data={[...messages].reverse()}
@@ -417,6 +443,34 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     // justifyContent: "flex-end",
   },
+  buttonClose: {
+    backgroundColor: "red",
+  },
+  textSuppr: {
+    color: "white",
+    textAlign: 'center',
+    backgroundColor: 'red'
+  },    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    }
 });
 
 export default HomeScreen;

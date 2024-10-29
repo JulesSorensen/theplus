@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,12 @@ import {
   Animated,
   SafeAreaView,
   Pressable,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { getMessages, publishMessages } from "../services/messages";
 import { getPseudoFromToken, getUser } from "../utils/authUtils";
+import { getSocket } from "../services/socket";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -21,6 +23,8 @@ const HomeScreen = () => {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [isAddGroupVisible, setAddGroupVisible] = useState(false);
   const [messages, setMessages] = useState([]);
+  const messageRef = useRef(messages);
+
   const [messageInput, setMessageInput] = useState("");
   const menuAnimation = useState(new Animated.Value(-250))[0];
   const [myPseudo, setMyPseudo] = useState(null);
@@ -28,8 +32,9 @@ const HomeScreen = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await getMessages();
-      setMessages(response);
+      const msgs = await getMessages();
+      setMessages(msgs);
+      messageRef.current = msgs;
     } catch (error) {
       console.error("Erreur lors de la récupération des messages :", error);
     }
@@ -44,12 +49,6 @@ const HomeScreen = () => {
     const user = await getUser();
     setUser(user);
   };
-
-  useEffect(() => {
-    setupUser();
-    fetchMessages();
-    fetchPseudo();
-  }, []);
 
   const toggleMenu = () => {
     setMenuVisible(!isMenuVisible);
@@ -101,10 +100,10 @@ const HomeScreen = () => {
           id: response.id,
           content: response.content,
           user: response.user,
-          type: "sent",
         };
 
         setMessages([...messages, newMessage]);
+        messageRef.current = [...messageRef.current, newMessage];
         setMessageInput("");
       } catch (error) {
         console.error("Erreur lors de l'envoi du message :", error);
@@ -113,26 +112,54 @@ const HomeScreen = () => {
   };
 
   const renderMessage = ({ item }) => {
+    const isFromMe = item.user.id === user.id;
+
     return (
       <View
-        style={[
-          styles.messageBubble,
-          item.user.id === user.id ? styles.sentBubble : styles.receivedBubble,
-        ]}
+        style={isFromMe ? styles.messageContainerSent : styles.messageContainer}
       >
-        <Text
-          style={
-            item.type === "sent"
-              ? styles.sentMessageText
-              : styles.receivedMessageText
-          }
+        <Image
+          source={{
+            uri: `https://gravatar.com/avatar/${item.user?.hashedName}?s=200&d=wavatar`,
+          }}
+          style={isFromMe ? styles.myMessageAvatar : styles.messageAvatar}
+        />
+        <View
+          style={[
+            styles.messageBubble,
+            isFromMe ? styles.sentBubble : styles.receivedBubble,
+          ]}
         >
-          {item.content}
-        </Text>
-        <Text style={styles.messageSender}>{item.user.name}</Text>
+          {!isFromMe && (
+            <Text style={styles.messageSender}>{item.user.name}</Text>
+          )}
+          <Text
+            style={
+              isFromMe ? styles.sentMessageText : styles.receivedMessageText
+            }
+          >
+            {item.content}
+          </Text>
+        </View>
       </View>
     );
   };
+
+  const initSocket = async () => {
+    const socket = await getSocket();
+    socket.on("message", (message) => {
+      console.log("Message reçu :", message);
+      messageRef.current = [...messageRef.current, message];
+      setMessages([...messageRef.current]);
+    });
+  };
+
+  useEffect(() => {
+    setupUser();
+    initSocket();
+    fetchMessages();
+    fetchPseudo();
+  }, []);
 
   if (!user) return <></>;
 
@@ -189,10 +216,11 @@ const HomeScreen = () => {
           <Text style={styles.chatTitle}>Chat global</Text>
           {messages !== undefined ? (
             <FlatList
-              data={messages}
+              data={[...messages].reverse()}
               keyExtractor={(item) => item.id}
               renderItem={renderMessage}
               contentContainerStyle={styles.chatContent}
+              inverted
             />
           ) : (
             <Text>Loading</Text>
@@ -301,14 +329,13 @@ const styles = StyleSheet.create({
   },
   chatContainer: {
     flex: 1,
-    marginTop: 80,
     marginHorizontal: 20,
-    backgroundColor: "#ffffff",
     borderRadius: 10,
     padding: 10,
     elevation: 3,
   },
   chatTitle: {
+    paddingLeft: 20,
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
@@ -320,7 +347,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
     padding: 5,
     borderRadius: 10,
     marginTop: 10,
@@ -345,7 +371,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   messageBubble: {
-    maxWidth: "80%",
+    maxWidth: "90%",
     padding: 10,
     borderRadius: 15,
     marginVertical: 5,
@@ -353,25 +379,45 @@ const styles = StyleSheet.create({
   sentBubble: {
     backgroundColor: "#007aff",
     alignSelf: "flex-end",
-    borderBottomRightRadius: 0,
+    borderTopRightRadius: 0,
   },
   receivedBubble: {
-    backgroundColor: "#e0e0e0", // Couleur plus foncée pour le message reçu
+    backgroundColor: "#e0e0e0",
     alignSelf: "flex-start",
-    borderBottomLeftRadius: 0,
+    borderTopLeftRadius: 0,
   },
   receivedMessageText: {
+    marginTop: 5,
     color: "black",
     fontSize: 16,
   },
   sentMessageText: {
+    marginTop: 5,
     color: "white",
     fontSize: 16,
   },
   messageSender: {
-    color: "#333", // Changement pour une meilleure visibilité
+    color: "#333",
     fontSize: 12,
-    marginTop: 5,
+  },
+  messageAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  myMessageAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginLeft: 10,
+  },
+  messageContainer: {
+    flexDirection: "row",
+  },
+  messageContainerSent: {
+    flexDirection: "row-reverse",
+    // justifyContent: "flex-end",
   },
 });
 

@@ -20,9 +20,9 @@ Pour lancer le projet :
 
 ```bash
 cd front
-nvm use 20.8.0
+nvm use 16.20.2
 npm install
-npm run [web|android|ios]
+npm run [android|ios]
 ```
 
 ### Backend

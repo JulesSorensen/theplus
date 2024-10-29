@@ -11,7 +11,7 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       await loginInApp(email, password)
-      navigation.navigate('Home')
+      navigation.replace('Home')
     } catch (error) {
       Alert.alert(
         'Une erreur est survenue',

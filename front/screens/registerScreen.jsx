@@ -14,7 +14,7 @@ const RegisterScreen = ({ navigation }) => {
       await register({ email: email, name: name, password: password })
       await loginInApp(email, password)
       
-      navigation.navigate('Home')
+      navigation.replace('Home')
     } catch (error) {
       Alert.alert(
         'Une erreur est survenue',

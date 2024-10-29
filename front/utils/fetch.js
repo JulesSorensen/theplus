@@ -1,34 +1,38 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const r = async (params) => {
- 
-  if (params.data && params.method === 'GET') {
+  if (params.data && params.method === "GET") {
     params.data = Object.fromEntries(
       Object.entries(params.data).filter(([_, v]) => v != null),
     );
   }
+
+  const jwt = await AsyncStorage.getItem("jwt");
+
   const headers = new Headers({
-    "ngrok-skip-browser-warning" :  true,
-    "Content-Type": "application/json"
-  })
-  const requestInit= {
+    "ngrok-skip-browser-warning": true,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${jwt}`,
+  });
+  const requestInit = {
     method: params.method.toUpperCase(),
-    headers
+    headers,
   };
 
-  if (params.data && ['POST', 'PUT', 'PATCH'].includes(params.method)) {
+  if (params.data && ["POST", "PUT", "PATCH"].includes(params.method)) {
     requestInit.body = JSON.stringify(params.data);
-  } else if (params.data && params.method === 'GET') {
+  } else if (params.data && params.method === "GET") {
     params.url += `?${new URLSearchParams(params.data).toString()}`;
   }
-  
+
   const response = await fetch(`${params.url}`, requestInit);
-  if (params.download) return await (response.blob());
+  if (params.download) return await response.blob();
 
   if (response.ok) {
-    const contentType = response.headers.get('content-type');
-    return contentType?.includes('application/json')
+    const contentType = response.headers.get("content-type");
+    return contentType?.includes("application/json")
       ? await response.json()
-      : await (response.text());
+      : await response.text();
   }
 
   const errorResult = await response.text();

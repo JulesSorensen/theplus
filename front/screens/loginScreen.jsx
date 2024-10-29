@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, View, Text, TextInput, Button, Pressable, StyleSheet } from 'react-native';
 import { loginInApp } from '../services/login';
+import { checkAccount } from '../services/checkAccount';
 
 const LoginScreen = ({ navigation }) => {
 
@@ -10,6 +11,7 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       await loginInApp(email, password)
+      navigation.navigate('Home')
     } catch (error) {
       Alert.alert(
         'Une erreur est survenue',
@@ -25,6 +27,10 @@ const LoginScreen = ({ navigation }) => {
       );
     }
   }
+  
+  useEffect(()=> {
+    checkAccount(navigation)
+  }, [])
 
   return (
     <View style={styles.container}>

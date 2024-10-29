@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert,View, Text, Button, TextInput, StyleSheet, Pressable } from 'react-native';
 import { register } from '../services/register';
 import { loginInApp } from '../services/login';
-
-
+import { checkAccount } from '../services/checkAccount';
 
 const RegisterScreen = ({ navigation }) => {
-
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+
   const createUserInBDDViaAPIURL = async () => {
     try {
       await register({ email: email, name: name, password: password })
       await loginInApp(email, password)
+      
+      navigation.navigate('Home')
     } catch (error) {
       Alert.alert(
         'Une erreur est survenue',
@@ -28,6 +29,10 @@ const RegisterScreen = ({ navigation }) => {
         }
     );}
   }
+  
+  useEffect(()=> {
+    checkAccount(navigation)
+  }, [])
 
   return (
     <View style={styles.container}>

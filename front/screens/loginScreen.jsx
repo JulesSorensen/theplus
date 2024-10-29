@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, View, Text, TextInput, Button, Pressable, StyleSheet } from 'react-native';
-import { loginInApp } from '../services/login';
+import { loginInApp, formatErrorMessage } from '../services/login';
 import { checkAccount } from '../services/checkAccount';
 
 const LoginScreen = ({ navigation }) => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+
   const connect = async () => {
 
     try {
-      await loginInApp(email, password)
-      navigation.replace('Home')
+      await loginInApp(email, password, navigation)
     } catch (error) {
+
       Alert.alert(
         'Une erreur est survenue',
-        error.message,
+        formatErrorMessage(error),
         [
           {
             text: 'Compris',

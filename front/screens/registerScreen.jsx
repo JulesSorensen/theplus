@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Alert,View, Text, Button, TextInput, StyleSheet, Pressable } from 'react-native';
 import { register } from '../services/register';
-import { loginInApp } from '../services/login';
+import { loginInApp, formatErrorMessage  } from '../services/login';
 import { checkAccount } from '../services/checkAccount';
 
 const RegisterScreen = ({ navigation }) => {
@@ -12,13 +12,11 @@ const RegisterScreen = ({ navigation }) => {
   const createUserInBDDViaAPIURL = async () => {
     try {
       await register({ email: email, name: name, password: password })
-      await loginInApp(email, password)
-      
-      navigation.replace('Home')
+      await loginInApp(email, password, navigation)
     } catch (error) {
       Alert.alert(
         'Une erreur est survenue',
-        error.message,
+        formatErrorMessage(error),
         [
           {
             text: 'Compris',
@@ -26,8 +24,9 @@ const RegisterScreen = ({ navigation }) => {
         ],
         {
           cancelable: true,
-        }
-    );}
+        },
+      );
+    }
   }
   
   useEffect(()=> {

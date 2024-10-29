@@ -25,6 +25,7 @@ import { getSocket } from "../services/socket";
 import Invitation from "../composant/Invitation";
 import Toast from "react-native-toast-message";
 import MessageAction from "../components/MessageAction";
+import { getGroups } from "../services/groups";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -43,89 +44,96 @@ const HomeScreen = () => {
 
   const [messageToAction, setMessageToAction] = useState();
 
-  const fetchMessages = async () => {
-    try {
-      const msgs = await getMessages();
-      setMessages(msgs);
-      messageRef.current = msgs;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des messages :", error);
-    }
-  };
+    const fetchMessages = async () => {
+        try {
+            const msgs = await getMessages();
+            setMessages(msgs);
+            messageRef.current = msgs;
+        } catch (error) {
+            console.error("Erreur lors de la récupération des messages :", error);
+        }
+    };
 
-  const fetchPseudo = async () => {
-    const userPseudo = await getPseudoFromToken();
-    setMyPseudo(userPseudo);
-  };
+    const fetchPseudo = async () => {
+        const userPseudo = await getPseudoFromToken();
+        setMyPseudo(userPseudo);
+    };
 
-  const setupUser = async () => {
-    const user = await getUser();
-    setUser(user);
-  };
+    const setupUser = async () => {
+        const user = await getUser();
+        setUser(user);
+    };
 
-  const toggleMenu = () => {
-    setMenuVisible(!isMenuVisible);
-    Animated.timing(menuAnimation, {
-      toValue: isMenuVisible ? -250 : 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
+    const fetchGroups = async () => {
+        try {
+            const fetchedGroups = await getGroups();
+            setGroups(fetchedGroups);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des groupes :", error);
+        }
+    };
 
-  const addGroup = () => {
-    if (groupName.trim()) {
-      const groupExists = groups.some(
-        (group) => group.name.toLowerCase() === groupName.toLowerCase(),
-      );
-      if (groupExists) {
-        alert("Le nom du groupe existe déjà. Veuillez en choisir un autre.");
-        return;
-      }
+    const toggleMenu = () => {
+        setMenuVisible(!isMenuVisible);
+        Animated.timing(menuAnimation, {
+            toValue: isMenuVisible ? -250 : 0,
+            duration: 300,
+            useNativeDriver: false,
+        }).start();
+    };
 
-      const newGroup = { id: Date.now().toString(), name: groupName };
-      setGroups([...groups, newGroup]);
-      setGroupName("");
-      setAddGroupVisible(false);
-      navigation.navigate("GroupInvit", {
-        groupName: newGroup.name,
-        groupId: newGroup.id,
-      });
-    }
-  };
+    const addGroup = () => {
+        if (groupName.trim()) {
+            const groupExists = groups.some(
+                (group) => group.name.toLowerCase() === groupName.toLowerCase(),
+            );
+            if (groupExists) {
+                alert("Le nom du groupe existe déjà. Veuillez en choisir un autre.");
+                return;
+            }
 
-  const openGroupInvit = (group) => {
-    navigation.navigate("GroupInvit", { groupName: group.name });
-  };
+            const newGroup = { name: groupName };
+            setGroupName("");
+            setAddGroupVisible(false);
+            navigation.navigate("GroupInvit", {
+                groupName: newGroup.name
+            });
+        }
+    };
 
-  const handleSendMessage = async () => {
-    if (messageInput.trim()) {
-      const newMessageData = {
-        content: messageInput,
-        user: {
-          name: myPseudo,
-        },
-      };
+    const openGroupChat = (group) => {
+        navigation.navigate("GroupChat", { groupName: group.name, groupId: group.id });
+    };
 
-      try {
-        const response = await publishMessages(newMessageData);
+    const handleSendMessage = async () => {
+        if (messageInput.trim()) {
+            const newMessageData = {
+                content: messageInput,
+                user: {
+                    name: myPseudo,
+                },
+            };
 
-        const newMessage = {
-          id: response.id,
-          content: response.content,
-          user: response.user,
-        };
+            try {
+                const response = await publishMessages(newMessageData);
 
-        setMessages([...messages, newMessage]);
-        messageRef.current = [...messageRef.current, newMessage];
-        setMessageInput("");
-      } catch (error) {
-        console.error("Erreur lors de l'envoi du message :", error);
-      }
-    }
-  };
+                const newMessage = {
+                    id: response.id,
+                    content: response.content,
+                    user: response.user,
+                };
 
-  const renderMessage = ({ item }) => {
-    const isFromMe = item.user.id === user.id;
+                setMessages([...messages, newMessage]);
+                messageRef.current = [...messageRef.current, newMessage];
+                setMessageInput("");
+            } catch (error) {
+                console.error("Erreur lors de l'envoi du message :", error);
+            }
+        }
+    };
+
+    const renderMessage = ({ item }) => {
+        const isFromMe = item.user.id === user.id;
 
     return (
       <View
@@ -194,71 +202,72 @@ const HomeScreen = () => {
     }
   };
 
-  const initSocket = async () => {
-    const socket = await getSocket();
-    socket.on("message", (message) => {
-      messageRef.current = [...messageRef.current, message];
-      setMessages([...messageRef.current]);
-    });
-  };
+    const initSocket = async () => {
+        const socket = await getSocket();
+        socket.on("message", (message) => {
+            messageRef.current = [...messageRef.current, message];
+            setMessages([...messageRef.current]);
+        });
+    };
 
-  useEffect(() => {
-    setupUser();
-    initSocket();
-    fetchMessages();
-    fetchPseudo();
-  }, []);
+    useEffect(() => {
+        setupUser();
+        initSocket();
+        fetchMessages();
+        fetchPseudo();
+        fetchGroups();
+    }, []);
 
-  if (!user) return <></>;
+    if (!user) return <></>;
 
-  return (
-    <SafeAreaView style={styles.safeContainer}>
-      <View style={styles.container}>
-        <TouchableOpacity onPress={toggleMenu} style={styles.burgerButton}>
-          <Text style={styles.burgerText}>☰</Text>
-        </TouchableOpacity>
+    return (
+        <SafeAreaView style={styles.safeContainer}>
+            <View style={styles.container}>
+                <TouchableOpacity onPress={toggleMenu} style={styles.burgerButton}>
+                    <Text style={styles.burgerText}>☰</Text>
+                </TouchableOpacity>
 
-        {isMenuVisible && (
-          <Pressable style={styles.overlay} onPress={toggleMenu} />
-        )}
+                {isMenuVisible && (
+                    <Pressable style={styles.overlay} onPress={toggleMenu} />
+                )}
 
-        <Animated.View
-          style={[styles.sideMenu, { left: menuAnimation, zIndex: 2 }]}
-        >
-          <Text style={styles.menuTitle}>Groupes</Text>
-          <FlatList
-            data={groups}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => openGroupInvit(item)}
-                style={styles.groupItem}
-              >
-                <Text style={styles.groupText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-          />
-          {isAddGroupVisible ? (
-            <View style={styles.addGroupContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Nom du groupe"
-                value={groupName}
-                onChangeText={setGroupName}
-              />
-              <TouchableOpacity style={styles.addButton} onPress={addGroup}>
-                <Text style={styles.addButtonText}>Ajouter</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.addGroupToggle}
-              onPress={() => setAddGroupVisible(true)}
-            >
-              <Text style={styles.addGroupText}>+ Ajouter un groupe</Text>
-            </TouchableOpacity>
-          )}
-        </Animated.View>
+                <Animated.View
+                    style={[styles.sideMenu, { left: menuAnimation, zIndex: 2 }]}
+                >
+                    <Text style={styles.menuTitle}>Groupes</Text>
+                    <FlatList
+                        data={groups}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                onPress={() => openGroupChat(item)}
+                                style={styles.groupItem}
+                            >
+                                <Text style={styles.groupText}>{item.name}</Text>
+                            </TouchableOpacity>
+                        )}
+                    />
+                    {isAddGroupVisible ? (
+                        <View style={styles.addGroupContainer}>
+                            <TextInput
+                                style={styles.textInput}
+                                placeholder="Nom du groupe"
+                                value={groupName}
+                                onChangeText={setGroupName}
+                            />
+                            <TouchableOpacity style={styles.addButton} onPress={addGroup}>
+                                <Text style={styles.addButtonText}>Ajouter</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            style={styles.addGroupToggle}
+                            onPress={() => setAddGroupVisible(true)}
+                        >
+                            <Text style={styles.addGroupText}>+ Ajouter un groupe</Text>
+                        </TouchableOpacity>
+                    )}
+                </Animated.View>
 
         <View style={styles.chatContainer}>
           <Text style={styles.chatTitle}>Chat global</Text>

@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { createGroup, createInvit } from '../services/groups';
+import { getUsers } from '../services/users'
 
 const GroupInvitScreen = ({ route }) => {
-    const { groupName, onGroupCreated } = route.params; // Récupérer la fonction de suppression du groupe
+    const { groupName, onGroupCreated } = route.params;
     const navigation = useNavigation();
 
-    const [users, setUsers] = useState([
-        { id: '1', username: 'Alice' },
-        { id: '2', username: 'Bob' },
-        { id: '3', username: 'Charlie' },
-        { id: '4', username: 'David' },
-        { id: '5', username: 'Eve' },
-    ]);
+    const [users, setUsers] = useState([]);
     const [searchText, setSearchText] = useState('');
     const [invitedUsers, setInvitedUsers] = useState([]);
 
     useEffect(() => {
-        // Lorsque le composant est démonté, appeler la fonction onGroupCreated pour supprimer le groupe
+        const loadUsers = async () => {
+            try {
+                const fetchedUsers = await getUsers();
+                setUsers(fetchedUsers);
+                console.log(users)
+            } catch (error) {
+                console.error("Erreur lors du chargement des utilisateurs :", error);
+            }
+        };
+        loadUsers();
+    }, []);
+
+    useEffect(() => {
         return () => {
             if (onGroupCreated) {
                 onGroupCreated();
@@ -26,7 +34,7 @@ const GroupInvitScreen = ({ route }) => {
     }, [onGroupCreated]);
 
     const filteredUsers = users.filter(user =>
-        user.username.toLowerCase().includes(searchText.toLowerCase())
+        user.name.toLowerCase().includes(searchText.toLowerCase())
     );
 
     const addUser = (user) => {
@@ -39,46 +47,20 @@ const GroupInvitScreen = ({ route }) => {
         setInvitedUsers(invitedUsers.filter(user => user.id !== userId));
     };
 
-    const createGroupChat = () => {
-        // Logique pour créer le groupe et naviguer vers l'écran de chat de groupe
-        navigation.navigate('GroupChat', { groupName: groupName, members: invitedUsers });
-    };
+    const createGroupAndInviteUsers = async () => {
+        try {
+            const newGroup = await createGroup({ name: groupName });
+            const groupId = newGroup.id;
 
-    const confirmExit = () => {
-        Alert.alert(
-            "Confirmation",
-            "Si vous quittez, le groupe ne sera pas créé. Êtes-vous sûr de vouloir continuer?",
-            [
-                {
-                    text: "Annuler",
-                    style: "cancel",
-                },
-                {
-                    text: "Quitter",
-                    onPress: () => {
-                        if (onGroupCreated) {
-                            onGroupCreated(); // Appeler la fonction pour supprimer le groupe
-                        }
-                        navigation.navigate('Home'); // Naviguer vers HomeScreen après la suppression
-                    },
-                },
-            ],
-            { cancelable: false }
-        );
-    };
+            const userIds = invitedUsers.map(user => user.id);
+            await createInvit({ userIds, groupId });
 
-    // Personnaliser l'en-tête
-    useEffect(() => {
-        navigation.setOptions({
-            headerLeft: () => (
-                <TouchableOpacity onPress={confirmExit} style={styles.closeButton}>
-                    <Text style={styles.closeButtonText}>✖</Text> 
-                </TouchableOpacity>
-            ),
-            headerTitle: () => <Text style={styles.headerTitle}>{groupName}</Text>,
-            headerBackVisible: false,
-        });
-    }, [navigation]);
+            navigation.replace('GroupChat', { groupName: groupName, groupId: groupId });
+        } catch (error) {
+            console.error("Erreur lors de la création du groupe ou de l'invitation :", error);
+            Alert.alert("Erreur", "Une erreur s'est produite lors de la création du groupe.");
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -92,11 +74,12 @@ const GroupInvitScreen = ({ route }) => {
             />
 
             <FlatList
+                style={styles.userList}
                 data={filteredUsers}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => (
                     <View style={styles.userItem}>
-                        <Text style={styles.username}>{item.username}</Text>
+                        <Text style={styles.username}>{item.name}</Text>
                         <TouchableOpacity onPress={() => addUser(item)} style={styles.addButton}>
                             <Text style={styles.addButtonText}>+</Text>
                         </TouchableOpacity>
@@ -107,11 +90,12 @@ const GroupInvitScreen = ({ route }) => {
             <Text style={styles.invitedTitle}>Utilisateurs invités :</Text>
             {invitedUsers.length > 0 ? (
                 <FlatList
+                    style={styles.invitedUserList}
                     data={invitedUsers}
                     keyExtractor={item => item.id}
                     renderItem={({ item }) => (
                         <View style={styles.invitedUserItem}>
-                            <Text style={styles.invitedUsername}>{item.username}</Text>
+                            <Text style={styles.invitedUsername}>{item.name}</Text>
                             <TouchableOpacity onPress={() => removeUser(item.id)} style={styles.removeButton}>
                                 <Text style={styles.removeButtonText}>Supprimer</Text>
                             </TouchableOpacity>
@@ -123,7 +107,7 @@ const GroupInvitScreen = ({ route }) => {
             )}
 
             {invitedUsers.length > 0 && (
-                <TouchableOpacity onPress={createGroupChat} style={styles.createButton}>
+                <TouchableOpacity onPress={createGroupAndInviteUsers} style={styles.createButton}>
                     <Text style={styles.createButtonText}>Créer</Text>
                 </TouchableOpacity>
             )}
@@ -148,6 +132,12 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 20,
+    },
+    userList: {
+        maxHeight: '40%',
+    },
+    invitedUserList: {
+        maxHeight: '40%',
     },
     userItem: {
         flexDirection: 'row',

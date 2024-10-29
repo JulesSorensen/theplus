@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Pressable, StyleSheet } from 'react-native';
+import { Alert, View, Text, TextInput, Button, Pressable, StyleSheet } from 'react-native';
 import { loginInApp } from '../services/login';
 
 const LoginScreen = ({ navigation }) => {
@@ -10,9 +10,19 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       await loginInApp(email, password)
-      console.log("c'est bon")
     } catch (error) {
-      console.log({ error })
+      Alert.alert(
+        'Une erreur est survenue',
+        error.message,
+        [
+          {
+            text: 'Compris',
+          },
+        ],
+        {
+          cancelable: true,
+        },
+      );
     }
   }
 

@@ -18,8 +18,9 @@ import {
 import { getSocket } from "../services/socket";
 import { Message } from "./Message";
 import { MessageAction } from "./MessageAction";
+import { deco } from "../services/disconnect";
 
-export const Chat = ({ title, user, groupId }) => {
+export const Chat = ({ title, user, groupId, navigation }) => {
   const [messageToAction, setMessageToAction] = useState();
   const [hasNotification, setHasNotification] = useState(false);
 
@@ -127,6 +128,7 @@ export const Chat = ({ title, user, groupId }) => {
   return (
     <View style={styles.chatContainer}>
       <Text style={styles.chatTitle}>{title}</Text>
+
       <Pressable style={styles.notification} onPress={() => setShowModal(true)}>
         <Image
           style={{ height: 25, width: 25 }}
@@ -137,6 +139,13 @@ export const Chat = ({ title, user, groupId }) => {
           }
         />
       </Pressable>
+      <Pressable style={styles.deconnection} onPress={() => deco(navigation)}>
+        <Image
+          style={{ height: 25, width: 25 }}
+          source={require(`../assets/deconnexion.png`)}
+        />
+      </Pressable>
+
 
       <Invitation
         visible={showModal}
@@ -198,7 +207,15 @@ const styles = StyleSheet.create({
   },
   notification: {
     position: "absolute",
-    right: 10,
+    right: 40,
     top: 12,
   },
+  deconnection: {
+    position: "absolute",
+    right: 5,
+    top: 12,
+  },
+  press: {
+    flexDirection: "row"
+  }
 });

@@ -6,11 +6,13 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Button
 } from "react-native";
 import { Chat } from "../components/Chat";
 import { SideBar } from "../components/Sidebar";
 import { getGroups } from "../services/groups";
 import { getUser } from "../utils/authUtils";
+import { deco } from "../services/disconnect";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -84,7 +86,7 @@ const HomeScreen = () => {
           openGroupChat={openGroupChat}
         />
 
-        <Chat title={"Chat global"} user={user} />
+        <Chat title={"Chat global"} user={user} navigation={navigation} />
       </View>
     </SafeAreaView>
   );

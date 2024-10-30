@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { sendError } from "../utils/errors";
 
 export const deco = async (navigation) =>{
     try {
@@ -6,7 +7,7 @@ export const deco = async (navigation) =>{
         await AsyncStorage.removeItem("user")
         navigation.replace('Login')
     } catch (error) {
-        console.log(error)
+        sendError(error)
     }
 
 }

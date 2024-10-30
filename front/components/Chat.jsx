@@ -72,6 +72,7 @@ export const Chat = ({ title, user, groupId }) => {
   const initSocket = async () => {
     const socket = await getSocket();
     setSocketState(socket);
+
     socket.on("message", (message) => {
       if (
         (!groupId && (!message.group || !message.group.id)) ||
@@ -79,6 +80,34 @@ export const Chat = ({ title, user, groupId }) => {
       ) {
         messageRef.current = [...messageRef.current, message];
         setMessages([...messageRef.current]);
+      }
+    });
+
+    socket.on("updateMessage", (updatedMessage) => {
+      if (
+        (!groupId && (!updatedMessage.group || !updatedMessage.group.id)) ||
+        (updatedMessage.group && groupId && updatedMessage.group.id === groupId)
+      ) {
+        const newMessages = messageRef.current.map((currentMessage) =>
+          currentMessage.id === updatedMessage.id
+            ? updatedMessage
+            : currentMessage,
+        );
+        messageRef.current = newMessages;
+        setMessages(newMessages);
+      }
+    });
+
+    socket.on("removeMessage", (removedMessage) => {
+      if (
+        (!groupId && (!removedMessage.group || !removedMessage.group.id)) ||
+        (removedMessage.group && groupId && removedMessage.group.id === groupId)
+      ) {
+        const newMessages = messageRef.current.filter(
+          (currentMessage) => currentMessage.id !== removedMessage.id,
+        );
+        messageRef.current = newMessages;
+        setMessages(newMessages);
       }
     });
   };

@@ -46,7 +46,7 @@ export class MessagesService {
       hashedName: sha256(author.name),
     };
 
-    this.messagesGateway.sendMessage(msg, members);
+    this.messagesGateway.sendMessage(msg, members, false);
 
     return msg;
   }
@@ -54,7 +54,7 @@ export class MessagesService {
   async findOne(id: number) {
     return this.messageRepository.findOne({
       where: { id },
-      relations: ["user"],
+      relations: ["user", "group", "group.groupsUsers"],
     });
   }
 
@@ -104,6 +104,11 @@ export class MessagesService {
       ...msg,
       ...updateMessageDto,
     });
+    let members: Partial<User[]> | any | undefined = undefined;
+    if (msg.group?.id) {
+      members = msg.group.groupsUsers.map((gu) => ({ id: gu.user.id }));
+    }
+    this.messagesGateway.sendMessage(msg, members, false);
 
     return updatedMsg;
   }
@@ -118,6 +123,8 @@ export class MessagesService {
 
     message.deletedAt = new Date();
     await this.messageRepository.save(message);
+
+    this.messagesGateway.removeMessage(message);
 
     return true;
   }

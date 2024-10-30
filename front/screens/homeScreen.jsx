@@ -5,14 +5,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  Button
+  View
 } from "react-native";
 import { Chat } from "../components/Chat";
 import { SideBar } from "../components/Sidebar";
 import { getGroups } from "../services/groups";
 import { getUser } from "../utils/authUtils";
-import { deco } from "../services/disconnect";
 
 const HomeScreen = () => {
   const navigation = useNavigation();

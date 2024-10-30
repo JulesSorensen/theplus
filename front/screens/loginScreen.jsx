@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Alert, View, Text, Pressable, StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
-import { loginInApp, formatErrorMessage } from "../services/login";
+import { loginInApp} from "../services/login";
 import { checkAccount } from "../services/checkAccount";
 import { sendError } from "../utils/errors";
 

@@ -12,15 +12,17 @@ const GroupInvitScreen = ({ route }) => {
     const [users, setUsers] = useState([]);
     const [searchText, setSearchText] = useState('');
     const [invitedUsers, setInvitedUsers] = useState([]);
+    const [password, setPassword] = useState("");
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         const loadUsers = async () => {
+
             try {
                 const fetchedUsers = await getUsers();
                 setUsers(fetchedUsers);
-                console.log(users)
             } catch (error) {
-                console.error("Erreur lors du chargement des utilisateurs :", error);
+                sendError(error);
             }
         };
         loadUsers();
@@ -49,6 +51,7 @@ const GroupInvitScreen = ({ route }) => {
     };
 
     const createGroupAndInviteUsers = async () => {
+        setIsLoaded(true);
         try {
             const newGroup = await createGroup({ name: groupName });
             const groupId = newGroup.id;
@@ -59,6 +62,8 @@ const GroupInvitScreen = ({ route }) => {
             navigation.replace('GroupChat', { groupName: groupName, groupId: groupId });
         } catch (error) {
             sendError(error);
+        } finally {
+            setIsLoaded(false);
         }
     };
 
@@ -107,7 +112,7 @@ const GroupInvitScreen = ({ route }) => {
             )}
 
             {invitedUsers.length > 0 && (
-                <TouchableOpacity onPress={createGroupAndInviteUsers} style={styles.createButton}>
+                <TouchableOpacity onPress={createGroupAndInviteUsers} style={styles.createButton} loading={isLoaded} disabled={isLoaded}>
                     <Text style={styles.createButtonText}>Créer</Text>
                 </TouchableOpacity>
             )}

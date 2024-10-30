@@ -59,6 +59,7 @@ const HomeScreen = () => {
     navigation.navigate("GroupChat", {
       groupName: group.name,
       groupId: group.id,
+      groupUsers: JSON.stringify(group.groupsUsers)
     });
   };
 

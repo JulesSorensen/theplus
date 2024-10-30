@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpException, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as sha256 from "sha256";
 import { IUserInfos } from "src/decorators/user.decorator";
@@ -6,6 +6,7 @@ import { GroupsService } from "src/groups/groups.service";
 import { User } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 import { CreateMessageDto } from "./dto/create-message.dto";
+import { UpdateMessageDto } from "./dto/update-message.dto";
 import { Message } from "./entities/message.entity";
 import { MessagesGateway } from "./messages.gateway";
 
@@ -28,10 +29,10 @@ export class MessagesService {
     let members: Partial<User[]> | any | undefined = undefined;
     if (createMessageDto.groupId) {
       const groups = await this.groupsService.findAllOfUser(author.id);
-      if (!groups) throw new Error("Group not found");
+      if (!groups) throw new HttpException("Group not found", 404);
 
       const group = groups.find((g) => g.id === createMessageDto.groupId);
-      if (!group) throw new Error("Group not found");
+      if (!group) throw new HttpException("Group not found", 404);
 
       members = group.groupsUsers.map((gu) => ({ id: gu.user.id }));
       messageToCreate.group = { id: createMessageDto.groupId };
@@ -89,14 +90,31 @@ export class MessagesService {
     });
   }
 
-  // update(id: number, updateMessageDto: UpdateMessageDto) {
-  //   return `This action updates a #${id} message`;
-  // }
+  async update(
+    id: number,
+    updateMessageDto: UpdateMessageDto,
+    user: IUserInfos,
+  ) {
+    const msg = await this.findOne(id);
+    if (!msg) throw new Error("Message not found");
+    if (msg.user.id !== user.id)
+      throw new Error("You are not allowed to update this message");
+
+    const updatedMsg = await this.messageRepository.save({
+      ...msg,
+      ...updateMessageDto,
+    });
+
+    return updatedMsg;
+  }
 
   async remove(id: number, user: IUserInfos) {
     const message = await this.findOne(id);
     if (message.user.id !== user.id)
-      throw new Error("You are not allowed to delete this message");
+      throw new HttpException(
+        "You are not allowed to delete this message",
+        403,
+      );
 
     message.deletedAt = new Date();
     await this.messageRepository.save(message);

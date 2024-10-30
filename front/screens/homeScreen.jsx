@@ -48,6 +48,7 @@ const HomeScreen = () => {
       }
 
       const newGroup = { name: groupName };
+      setGroups([...groups, newGroup]);
       navigation.navigate("GroupInvit", {
         groupName: newGroup.name,
       });

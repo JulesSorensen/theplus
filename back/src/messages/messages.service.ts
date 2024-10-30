@@ -18,6 +18,10 @@ export class MessagesService {
     private messagesGateway: MessagesGateway,
   ) {}
 
+  async sendInvitation(invite: any, userId: number) {
+    this.messagesGateway.sendInvit(invite, userId);
+  }
+
   async create(createMessageDto: CreateMessageDto, author: IUserInfos) {
     const messageToCreate: Message | any = {
       ...createMessageDto,

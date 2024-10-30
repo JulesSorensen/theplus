@@ -1,14 +1,15 @@
-import { UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import {
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    WebSocketGateway,
-    WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  WebSocketGateway,
+  WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { AuthService } from "src/auth/auth.service";
 import { User } from "src/users/entities/user.entity";
 
+@Injectable()
 @WebSocketGateway({
   cors: {
     origin: "*",
@@ -34,7 +35,10 @@ export class MessagesGateway
       const payload = await this.authService.parseJwt(jwt);
 
       client.data.user = payload;
-      this.clients.set(payload.id, { socket: client, user: payload });
+      this.clients.set(payload.id.toString(), {
+        socket: client,
+        user: payload,
+      });
     } catch (error) {
       console.error("Connection rejected:", error.message);
       client.disconnect();
@@ -56,7 +60,12 @@ export class MessagesGateway
 
   removeMessage(message: any) {
     for (const client of this.clients.values()) {
-      client.socket.emit("removeMessage", {id: message.id});
+      client.socket.emit("removeMessage", { id: message.id });
     }
+  }
+
+  sendInvit(invite: any, userId: number) {
+    const client = this.clients.get(userId.toString());
+    if (client) client.socket.emit("invite", invite);
   }
 }

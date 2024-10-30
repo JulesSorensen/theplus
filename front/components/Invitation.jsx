@@ -11,9 +11,11 @@ import Toast from "react-native-toast-message";
 import { getInvits, setInvit } from "../services/invitation";
 import { sendError } from "../utils/errors";
 import { IconButton } from "react-native-paper";
+import { getSocket } from "../services/socket";
 
 export const Invitation = ({ visible, hideModal, setHasNotification }) => {
   const [invitsList, setInvitsList] = useState();
+  const [socketState, setSocketState] = useState(false);
 
   const loadInvits = async () => {
     try {
@@ -68,8 +70,29 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
     </View>
   );
 
+  const initSocket = async () => {
+    const socket = await getSocket();
+    setSocketState(socket);
+
+    socket.on("invite", () => {
+      Toast.show({
+        type: "info",
+        text1: "Vous avez reçu une nouvelle invitation",
+      });
+      setHasNotification(true);
+      loadInvits();
+    });
+  };
+
   useEffect(() => {
     loadInvits();
+    initSocket();
+
+    return () => {
+      if (socketState) {
+        socketState.off("invite");
+      }
+    };
   }, []);
 
   return (

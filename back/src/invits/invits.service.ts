@@ -2,6 +2,7 @@ import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IUserInfos } from "src/decorators/user.decorator";
 import { GroupsService } from "src/groups/groups.service";
+import { MessagesService } from "src/messages/messages.service";
 import { UsersService } from "src/users/users.service";
 import { Repository } from "typeorm";
 import { CreateInvitDto } from "./dto/create-invit.dto";
@@ -15,6 +16,7 @@ export class InvitsService {
     @InjectRepository(Invit) private invitsRepository: Repository<Invit>,
     @Inject(UsersService) private readonly userService: UsersService,
     @Inject(GroupsService) private readonly groupservice: GroupsService,
+    @Inject(MessagesService) private readonly messagesService: MessagesService,
   ) {}
 
   async create(createInvitDto: CreateInvitDto, user: IUserInfos) {
@@ -51,6 +53,8 @@ export class InvitsService {
             status: EInvitStatus.PENDING,
           });
           invits.push(invit);
+
+          this.messagesService.sendInvitation(invit, userToInvit.id);
         }
       }),
     );

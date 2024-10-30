@@ -11,5 +11,6 @@ import { MessagesService } from "./messages.service";
   imports: [TypeOrmModule.forFeature([Message]), AuthModule, GroupsModule],
   controllers: [MessagesController],
   providers: [MessagesService, MessagesGateway],
+  exports: [MessagesService],
 })
 export class MessagesModule {}

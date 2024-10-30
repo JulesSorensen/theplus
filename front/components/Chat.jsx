@@ -19,8 +19,10 @@ import { Message } from "./Message";
 import { MessageAction } from "./MessageAction";
 import { deco } from "../services/disconnect";
 import { sendError } from "../utils/errors";
+import { GroupMembers } from "./GroupMembers";
+import { IconButton } from "react-native-paper";
 
-export const Chat = ({ title, user, groupId, navigation }) => {
+export const Chat = ({ title, user, groupId, groupUsers, navigation }) => {
   const [messageToAction, setMessageToAction] = useState();
   const [hasNotification, setHasNotification] = useState(false);
 
@@ -30,6 +32,10 @@ export const Chat = ({ title, user, groupId, navigation }) => {
 
   const [showModal, setShowModal] = useState(false);
   const [socketState, setSocketState] = useState(false);
+
+  const isGroupAdmin =
+    (groupUsers && groupUsers.find((u) => u.user?.id === user.id)?.isAdmin) ??
+    false;
 
   const addMessage = (newMessage) => {
     setMessages([...messages, newMessage]);
@@ -72,7 +78,7 @@ export const Chat = ({ title, user, groupId, navigation }) => {
       setMessages(msgs);
       messageRef.current = msgs;
     } catch (error) {
-      sendError(error)
+      sendError(error);
     }
   };
 
@@ -133,9 +139,21 @@ export const Chat = ({ title, user, groupId, navigation }) => {
 
   return (
     <View style={styles.chatContainer}>
-      <Text style={styles.chatTitle}>{title}</Text>
+      {/* Chat title */}
+      <View style={styles.chatTitleContainer}>
+        <Text style={styles.chatTitle}>{title}</Text>
+        {isGroupAdmin && (
+          <Pressable style={styles.editGroupName} onPress={() => {}}>
+            <IconButton icon="pencil" color="black" size={20} />
+          </Pressable>
+        )}
+      </View>
 
-      <Pressable style={styles.notification} onPress={() => setShowModal(true)}>
+      {/* Icons */}
+      <Pressable
+        style={groupId ? styles.notificationInGroups : styles.notification}
+        onPress={() => setShowModal(true)}
+      >
         <Image
           style={{ height: 25, width: 25 }}
           source={
@@ -145,12 +163,33 @@ export const Chat = ({ title, user, groupId, navigation }) => {
           }
         />
       </Pressable>
-      <Pressable style={styles.deconnection} onPress={() => deco(navigation)}>
+      <Pressable
+        style={groupId ? styles.notificationInGroups : styles.notification}
+        onPress={() => setShowModal(true)}
+      >
+        <Image
+          style={{ height: 25, width: 25 }}
+          source={
+            hasNotification
+              ? require(`../assets/notificationon.png`)
+              : require(`../assets/notificationoff.png`)
+          }
+        />
+      </Pressable>
+      <Pressable
+        style={groupId ? styles.deconnectionInGroups : styles.deconnection}
+        onPress={() => deco(navigation)}
+      >
         <Image
           style={{ height: 25, width: 25 }}
           source={require(`../assets/deconnexion.png`)}
         />
       </Pressable>
+      {groupId && (
+        <Pressable style={styles.groupMembers} onPress={() => deco(navigation)}>
+          <GroupMembers groupUsers={groupUsers} />
+        </Pressable>
+      )}
 
       <Invitation
         visible={showModal}
@@ -209,13 +248,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 10,
     padding: 10,
+    paddingRight: 50,
   },
   chatTitle: {
-    paddingLeft: 20,
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 10,
+    marginLeft: 20,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   chatContent: {
     paddingBottom: 60,
@@ -223,12 +265,34 @@ const styles = StyleSheet.create({
   notification: {
     position: "absolute",
     right: 40,
-    top: 12,
+    top: 20,
+  },
+  chatTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  editGroupName: {
+    opacity: 0.5,
+  },
+  notificationInGroups: {
+    position: "absolute",
+    right: 80,
+    top: 20,
   },
   deconnection: {
     position: "absolute",
     right: 5,
-    top: 12,
+    top: 20,
+  },
+  deconnectionInGroups: {
+    position: "absolute",
+    right: 5,
+    top: 20,
+  },
+  groupMembers: {
+    position: "absolute",
+    right: 25,
+    top: 3,
   },
   press: {
     flexDirection: "row",

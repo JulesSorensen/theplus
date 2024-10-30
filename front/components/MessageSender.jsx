@@ -8,12 +8,16 @@ import {
 } from "react-native";
 import { publishMessages } from "../services/messages";
 import { sendError } from "../utils/errors";
+import { IconButton } from "react-native-paper";
 
 export const MessageSender = ({ user, addMessage }) => {
   const [messageInput, setMessageInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async () => {
-    if (messageInput.length < 1) return;
+    if (isLoading || messageInput.length < 1) return;
+
+    setIsLoading(true);
 
     const newMessageData = {
       content: messageInput,
@@ -34,6 +38,8 @@ export const MessageSender = ({ user, addMessage }) => {
       setMessageInput("");
     } catch (error) {
       sendError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,7 +52,11 @@ export const MessageSender = ({ user, addMessage }) => {
         onChangeText={setMessageInput}
       />
       <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-        <Text style={styles.sendButtonText}>Envoyer</Text>
+        <IconButton
+          icon="send"
+          iconColor={isLoading ? "gray" : "#6200ee"}
+          size={25}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -67,16 +77,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 10,
-  },
-  sendButton: {
-    marginLeft: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: "#6200ee",
-    borderRadius: 10,
-  },
-  sendButtonText: {
-    color: "#fff",
-    fontSize: 16,
   },
 });

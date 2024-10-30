@@ -67,6 +67,7 @@ export class MessagesService {
       .createQueryBuilder("message")
       .leftJoinAndSelect("message.user", "user")
       .leftJoinAndSelect("message.group", "group")
+      .leftJoinAndSelect("group.groupsUsers", "groupsUsers")
       .where("message.deletedAt IS NULL");
 
     if (query.name) {

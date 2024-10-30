@@ -16,8 +16,10 @@ import { getSocket } from "../services/socket";
 export const Invitation = ({ visible, hideModal, setHasNotification }) => {
   const [invitsList, setInvitsList] = useState();
   const [socketState, setSocketState] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false)
 
   const loadInvits = async () => {
+    setIsLoaded(true);
     try {
       const allInvits = await getInvits();
       setInvitsList(allInvits);
@@ -28,6 +30,8 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
       }
     } catch (error) {
       sendError(error);
+    } finally {
+      setIsLoaded(false);
     }
   };
 
@@ -54,6 +58,8 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
           <Pressable
             style={[styles.button, styles.buttonValide]}
             onPress={() => responseInvit(item.id, 200, "Validation")}
+            loading={isLoaded}
+            disabled={isLoaded}
           >
             <IconButton size={15} icon="check" />
           </Pressable>
@@ -62,6 +68,8 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
           <Pressable
             style={[styles.button, styles.buttonRefus]}
             onPress={() => responseInvit(item.id, 300, "Suppression")}
+            loading={isLoaded}
+            disabled={isLoaded}
           >
             <IconButton size={15} icon="trash-can" />
           </Pressable>

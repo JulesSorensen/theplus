@@ -3,6 +3,7 @@ import { Alert, View, Text, Pressable, StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { loginInApp, formatErrorMessage } from "../services/login";
 import { checkAccount } from "../services/checkAccount";
+import { sendError } from "../utils/errors";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -14,18 +15,7 @@ const LoginScreen = ({ navigation }) => {
     try {
       await loginInApp(email, password, navigation);
     } catch (error) {
-      Alert.alert(
-        "Une erreur est survenue",
-        formatErrorMessage(error),
-        [
-          {
-            text: "Compris",
-          },
-        ],
-        {
-          cancelable: true,
-        },
-      );
+      sendError(error);
     } finally {
       setIsLoaded(false);
     }

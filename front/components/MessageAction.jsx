@@ -2,12 +2,7 @@ import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { IconButton } from "react-native-paper";
 
-export default MessageAction = ({
-  ownMessage,
-  onEdit,
-  onDelete,
-  hideModal,
-}) => (
+export const MessageAction = ({ ownMessage, onEdit, onDelete, hideModal }) => (
   <Modal animationType="slide" transparent={true} visible={true}>
     <View style={styles.centeredView}>
       <View style={styles.modalView}>

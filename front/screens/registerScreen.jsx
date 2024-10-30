@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Alert, View, Text, StyleSheet, Pressable } from "react-native";
-import { register } from "../services/register";
-import { loginInApp, formatErrorMessage } from "../services/login";
-import { checkAccount } from "../services/checkAccount";
+import React, { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Button, TextInput } from "react-native-paper";
+import { checkAccount } from "../services/checkAccount";
+import { loginInApp } from "../services/login";
+import { register } from "../services/register";
+import { sendError } from "../utils/errors";
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -18,18 +19,7 @@ const RegisterScreen = ({ navigation }) => {
       await register({ email: email, name: name, password: password });
       await loginInApp(email, password, navigation);
     } catch (error) {
-      Alert.alert(
-        "Une erreur est survenue",
-        formatErrorMessage(error),
-        [
-          {
-            text: "Compris",
-          },
-        ],
-        {
-          cancelable: true,
-        },
-      );
+      sendError(error);
     } finally {
       setIsLoaded(false);
     }

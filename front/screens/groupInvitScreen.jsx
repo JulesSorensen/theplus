@@ -3,6 +3,7 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } 
 import { useNavigation } from '@react-navigation/native';
 import { createGroup, createInvit } from '../services/groups';
 import { getUsers } from '../services/users'
+import { sendError } from '../utils/errors';
 
 const GroupInvitScreen = ({ route }) => {
     const { groupName, onGroupCreated } = route.params;
@@ -57,8 +58,7 @@ const GroupInvitScreen = ({ route }) => {
 
             navigation.replace('GroupChat', { groupName: groupName, groupId: groupId });
         } catch (error) {
-            console.error("Erreur lors de la création du groupe ou de l'invitation :", error);
-            Alert.alert("Erreur", "Une erreur s'est produite lors de la création du groupe.");
+            sendError(error);
         }
     };
 

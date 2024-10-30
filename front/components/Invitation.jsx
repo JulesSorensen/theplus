@@ -10,14 +10,18 @@ import {
 import Toast from "react-native-toast-message";
 import { getInvits, setInvit } from "../services/invitation";
 import { sendError } from "../utils/errors";
+import { IconButton } from "react-native-paper";
 
-export const Invitation = ({ visible, hideModal }) => {
+export const Invitation = ({ visible, hideModal, setHasNotification }) => {
   const [invitsList, setInvitsList] = useState();
 
   const loadInvits = async () => {
     try {
       const allInvits = await getInvits();
       setInvitsList(allInvits);
+      if (allInvits.length > 0) {
+        setHasNotification(true);
+      }
     } catch (error) {
       sendError(error);
     }
@@ -47,7 +51,7 @@ export const Invitation = ({ visible, hideModal }) => {
             style={[styles.button, styles.buttonValide]}
             onPress={() => responseInvit(item.id, 200, "Validation")}
           >
-            <Text>V</Text>
+            <IconButton size={15} icon="check" />
           </Pressable>
         </View>
         <View>
@@ -55,7 +59,7 @@ export const Invitation = ({ visible, hideModal }) => {
             style={[styles.button, styles.buttonRefus]}
             onPress={() => responseInvit(item.id, 300, "Suppression")}
           >
-            <Text>X</Text>
+            <IconButton size={15} icon="trash-can" />
           </Pressable>
         </View>
       </View>
@@ -74,11 +78,15 @@ export const Invitation = ({ visible, hideModal }) => {
             <Text>Chargement...</Text>
           ) : (
             <>
-              <FlatList
-                data={invitsList}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id.toString()}
-              />
+              {invitsList.length === 0 ? (
+                <Text style={styles.noInvits}>Aucune notification</Text>
+              ) : (
+                <FlatList
+                  data={invitsList}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.id.toString()}
+                />
+              )}
 
               <View style={styles.viewButton}>
                 <View>
@@ -86,7 +94,7 @@ export const Invitation = ({ visible, hideModal }) => {
                     style={[styles.button, styles.buttonClose]}
                     onPress={hideModal}
                   >
-                    <Text style={styles.textSuppr}>X</Text>
+                    <IconButton icon="close" />
                   </Pressable>
                 </View>
               </View>
@@ -105,18 +113,19 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 20,
-    padding: 10,
-    elevation: 2,
+    padding: 1,
   },
   buttonValide: {
     color: "white",
     textAlign: "center",
     backgroundColor: "green",
+    marginRight: 5,
   },
   buttonRefus: {
     color: "white",
     textAlign: "center",
     backgroundColor: "red",
+    marginLeft: 5,
   },
   centeredView: {
     flex: 1,
@@ -125,7 +134,8 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    margin: 20,
+    width: "80%",
+    height: "50%",
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
@@ -140,6 +150,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonClose: {
-    backgroundColor: "red",
+    backgroundColor: "darkgrey",
+  },
+  noInvits: {
+    marginBottom: "auto",
   },
 });

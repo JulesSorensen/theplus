@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  Button,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+} from "react-native";
 import { Invitation } from "../components/Invitation";
 import { MessageSender } from "../components/MessageSender";
 import {
@@ -13,6 +21,7 @@ import { MessageAction } from "./MessageAction";
 
 export const Chat = ({ title, user, groupId }) => {
   const [messageToAction, setMessageToAction] = useState();
+  const [hasNotification, setHasNotification] = useState(false);
 
   const [messages, setMessages] = useState([]);
   const messageRef = useRef(messages);
@@ -89,8 +98,22 @@ export const Chat = ({ title, user, groupId }) => {
   return (
     <View style={styles.chatContainer}>
       <Text style={styles.chatTitle}>{title}</Text>
+      <Pressable style={styles.notification} onPress={() => setShowModal(true)}>
+        <Image
+          style={{ height: 25, width: 25 }}
+          source={
+            hasNotification
+              ? require(`../assets/notificationon.png`)
+              : require(`../assets/notificationoff.png`)
+          }
+        />
+      </Pressable>
 
-      <Invitation visible={showModal} hideModal={() => setShowModal(false)} />
+      <Invitation
+        visible={showModal}
+        hideModal={() => setShowModal(false)}
+        setHasNotification={setHasNotification}
+      />
 
       {messageToAction !== undefined && (
         <MessageAction
@@ -100,7 +123,6 @@ export const Chat = ({ title, user, groupId }) => {
         />
       )}
 
-      <Button title="Notification" onPress={() => setShowModal(true)}></Button>
       {messages !== undefined ? (
         <FlatList
           data={[...messages].reverse()}
@@ -144,5 +166,10 @@ const styles = StyleSheet.create({
   },
   chatContent: {
     paddingBottom: 60,
+  },
+  notification: {
+    position: "absolute",
+    right: 10,
+    top: 12,
   },
 });

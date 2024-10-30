@@ -248,7 +248,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 10,
     padding: 10,
-    paddingRight: 50,
   },
   chatTitle: {
     fontSize: 24,
@@ -270,6 +269,7 @@ const styles = StyleSheet.create({
   chatTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
+    paddingBottom: 15,
   },
   editGroupName: {
     opacity: 0.5,

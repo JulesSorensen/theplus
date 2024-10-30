@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Button,
   FlatList,
   Pressable,
   StyleSheet,
@@ -19,6 +18,7 @@ import { getSocket } from "../services/socket";
 import { Message } from "./Message";
 import { MessageAction } from "./MessageAction";
 import { deco } from "../services/disconnect";
+import { sendError } from "../utils/errors";
 
 export const Chat = ({ title, user, groupId, navigation }) => {
   const [messageToAction, setMessageToAction] = useState();
@@ -66,7 +66,7 @@ export const Chat = ({ title, user, groupId, navigation }) => {
       setMessages(msgs);
       messageRef.current = msgs;
     } catch (error) {
-      console.error("Erreur lors de la récupération des messages :", error);
+      sendError(error)
     }
   };
 

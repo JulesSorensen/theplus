@@ -56,10 +56,17 @@ export class MessagesService {
   }
 
   async findOne(id: number) {
-    return this.messageRepository.findOne({
+    const msg = await this.messageRepository.findOne({
       where: { id },
       relations: ["user", "group", "group.groupsUsers"],
     });
+
+    msg.user = {
+      ...msg.user,
+      hashedName: sha256(msg.user.name),
+    }
+
+    return msg;
   }
 
   async findAll(query: any) {
@@ -67,7 +74,6 @@ export class MessagesService {
       .createQueryBuilder("message")
       .leftJoinAndSelect("message.user", "user")
       .leftJoinAndSelect("message.group", "group")
-      .leftJoinAndSelect("group.groupsUsers", "groupsUsers")
       .where("message.deletedAt IS NULL");
 
     if (query.name) {
@@ -105,10 +111,12 @@ export class MessagesService {
     if (msg.user.id !== user.id)
       throw new Error("You are not allowed to update this message");
 
-    const updatedMsg = await this.messageRepository.save({
+    const updatedMsg = {
       ...msg,
-      ...updateMessageDto,
-    });
+      content: updateMessageDto.content,
+    }
+
+    await this.messageRepository.save(updatedMsg);
     let members: Partial<User[]> | any | undefined = undefined;
     if (msg.group?.id) {
       members = msg.group.groupsUsers.map((gu) => ({ id: gu.user.id }));

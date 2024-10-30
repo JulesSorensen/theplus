@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,11 +6,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { publishMessages } from "../services/messages";
+import { editMessage, publishMessages } from "../services/messages";
 import { sendError } from "../utils/errors";
 import { IconButton } from "react-native-paper";
 
-export const MessageSender = ({ user, addMessage }) => {
+export const MessageSender = ({
+  user,
+  addMessage,
+  editedMessage,
+  confirmEdition,
+}) => {
   const [messageInput, setMessageInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,14 +32,19 @@ export const MessageSender = ({ user, addMessage }) => {
     };
 
     try {
-      const response = await publishMessages(newMessageData);
-      const newMessage = {
-        id: response.id,
-        content: response.content,
-        user: response.user,
-      };
+      if (editedMessage) {
+        const response = await editMessage(editedMessage.id, newMessageData);
+        confirmEdition(response);
+      } else {
+        const response = await publishMessages(newMessageData);
+        const newMessage = {
+          id: response.id,
+          content: response.content,
+          user: response.user,
+        };
 
-      addMessage(newMessage);
+        addMessage(newMessage);
+      }
       setMessageInput("");
     } catch (error) {
       sendError(error);
@@ -42,6 +52,12 @@ export const MessageSender = ({ user, addMessage }) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (editedMessage) {
+      setMessageInput(editedMessage.content);
+    }
+  }, [editedMessage]);
 
   return (
     <View style={styles.inputContainer}>
@@ -52,11 +68,19 @@ export const MessageSender = ({ user, addMessage }) => {
         onChangeText={setMessageInput}
       />
       <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-        <IconButton
-          icon="send"
-          iconColor={isLoading ? "gray" : "#6200ee"}
-          size={25}
-        />
+        {!editedMessage ? (
+          <IconButton
+            icon="send"
+            iconColor={isLoading ? "gray" : "#6200ee"}
+            size={25}
+          />
+        ) : (
+          <IconButton
+            icon="pencil"
+            iconColor={isLoading ? "gray" : "#6200ee"}
+            size={25}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );

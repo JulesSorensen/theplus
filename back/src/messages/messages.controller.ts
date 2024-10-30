@@ -1,16 +1,18 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    UseGuards,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { IUserInfos, UserInfos } from "src/decorators/user.decorator";
 import { CreateMessageDto } from "./dto/create-message.dto";
+import { UpdateMessageDto } from "./dto/update-message.dto";
 import { MessagesService } from "./messages.service";
 
 @Controller("messages")
@@ -32,10 +34,10 @@ export class MessagesController {
     return this.messagesService.findAll(query);
   }
 
-  // @Patch(":id")
-  // update(@Param("id") id: string, @Body() updateMessageDto: UpdateMessageDto) {
-  //   return this.messagesService.update(+id, updateMessageDto);
-  // }
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateMessageDto: UpdateMessageDto, @UserInfos() user: IUserInfos) {
+    return this.messagesService.update(+id, updateMessageDto, user);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Delete(":id")

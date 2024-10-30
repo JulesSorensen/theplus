@@ -26,6 +26,7 @@ export const Chat = ({ title, user, groupId, navigation }) => {
 
   const [messages, setMessages] = useState([]);
   const messageRef = useRef(messages);
+  const [messageToEdit, setMessageToEdit] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [socketState, setSocketState] = useState(false);
@@ -51,6 +52,11 @@ export const Chat = ({ title, user, groupId, navigation }) => {
     } finally {
       setMessageToAction(undefined);
     }
+  };
+
+  const onEditMessage = () => {
+    setMessageToEdit(messageToAction);
+    setMessageToAction(undefined);
   };
 
   const fetchMessages = async () => {
@@ -146,7 +152,6 @@ export const Chat = ({ title, user, groupId, navigation }) => {
         />
       </Pressable>
 
-
       <Invitation
         visible={showModal}
         hideModal={() => setShowModal(false)}
@@ -157,6 +162,7 @@ export const Chat = ({ title, user, groupId, navigation }) => {
         <MessageAction
           ownMessage={messageToAction.user.id === user.id}
           onDelete={onDeleteMessage}
+          onEdit={onEditMessage}
           hideModal={() => setMessageToAction(undefined)}
         />
       )}
@@ -170,9 +176,6 @@ export const Chat = ({ title, user, groupId, navigation }) => {
               message={item}
               isFromMe={item.user.id === user.id}
               onLongPress={() => {
-                console.log("Long press");
-                console.log({ item });
-                console.log({ setMessageToAction });
                 setMessageToAction(item);
               }}
             />
@@ -183,7 +186,19 @@ export const Chat = ({ title, user, groupId, navigation }) => {
       ) : (
         <Text>Loading</Text>
       )}
-      <MessageSender user={user} addMessage={addMessage} />
+      <MessageSender
+        editedMessage={messageToEdit}
+        confirmEdition={(message) => {
+          setMessageToEdit(false);
+          const newMessages = messageRef.current.map((currentMessage) => {
+            return currentMessage.id === message.id ? message : currentMessage;
+          });
+          messageRef.current = newMessages;
+          setMessages(newMessages);
+        }}
+        user={user}
+        addMessage={addMessage}
+      />
     </View>
   );
 };
@@ -216,6 +231,6 @@ const styles = StyleSheet.create({
     top: 12,
   },
   press: {
-    flexDirection: "row"
-  }
+    flexDirection: "row",
+  },
 });

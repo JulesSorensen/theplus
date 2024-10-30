@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as sha256 from "sha256";
 import { IUserInfos } from "src/decorators/user.decorator";
 import { Repository } from "typeorm";
 import { CreateGroupDto } from "./dto/group.dto";
@@ -111,6 +112,8 @@ export class GroupsService {
         delete c.user.email;
         delete c.user.createdAt;
         delete c.user.updatedAt;
+
+        c.user.hashedName = sha256(c.user.name);
 
         return c;
       }),

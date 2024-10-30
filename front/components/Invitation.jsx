@@ -21,6 +21,8 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
       setInvitsList(allInvits);
       if (allInvits.length > 0) {
         setHasNotification(true);
+      } else {
+        setHasNotification(false);
       }
     } catch (error) {
       sendError(error);

@@ -1,12 +1,13 @@
-import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from "react";
+import { PaperProvider } from "react-native-paper";
+import Toast from "react-native-toast-message";
+import GroupChatScreen from "./screens/groupChatScreen";
+import GroupInvitScreen from "./screens/groupInvitScreen";
+import HomeScreen from "./screens/homeScreen";
 import LoginScreen from "./screens/loginScreen";
 import RegisterScreen from "./screens/registerScreen";
-import HomeScreen from "./screens/homeScreen";
-import GroupInvitScreen from "./screens/groupInvitScreen";
-import GroupChatScreen from "./screens/groupChatScreen";
-import { PaperProvider } from "react-native-paper";
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,7 @@ const App = () => {
           <Stack.Screen name="GroupChat" component={GroupChatScreen} />
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast />
     </PaperProvider>
   );
 };

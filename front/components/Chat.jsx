@@ -22,7 +22,14 @@ import { sendError } from "../utils/errors";
 import { GroupMembers } from "./GroupMembers";
 import { IconButton } from "react-native-paper";
 
-export const Chat = ({ title, user, groupId, groupUsers, navigation }) => {
+export const Chat = ({
+  title,
+  user,
+  groupId,
+  groupUsers,
+  appendGroup,
+  navigation,
+}) => {
   const [messageToAction, setMessageToAction] = useState();
   const [hasNotification, setHasNotification] = useState(false);
 
@@ -195,6 +202,7 @@ export const Chat = ({ title, user, groupId, groupUsers, navigation }) => {
         visible={showModal}
         hideModal={() => setShowModal(false)}
         setHasNotification={setHasNotification}
+        appendGroup={appendGroup}
       />
 
       {messageToAction !== undefined && (
@@ -226,6 +234,7 @@ export const Chat = ({ title, user, groupId, groupUsers, navigation }) => {
         <Text>Loading</Text>
       )}
       <MessageSender
+        groupId={groupId}
         editedMessage={messageToEdit}
         confirmEdition={(message) => {
           setMessageToEdit(false);

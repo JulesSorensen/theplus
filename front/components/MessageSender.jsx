@@ -12,6 +12,7 @@ import { IconButton } from "react-native-paper";
 
 export const MessageSender = ({
   user,
+  groupId,
   addMessage,
   editedMessage,
   confirmEdition,
@@ -30,6 +31,8 @@ export const MessageSender = ({
         name: user.name,
       },
     };
+
+    if (groupId) newMessageData.groupId = groupId;
 
     try {
       if (editedMessage) {

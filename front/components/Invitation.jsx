@@ -13,10 +13,15 @@ import { sendError } from "../utils/errors";
 import { IconButton } from "react-native-paper";
 import { getSocket } from "../services/socket";
 
-export const Invitation = ({ visible, hideModal, setHasNotification }) => {
+export const Invitation = ({
+  visible,
+  hideModal,
+  setHasNotification,
+  appendGroup,
+}) => {
   const [invitsList, setInvitsList] = useState();
   const [socketState, setSocketState] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const loadInvits = async () => {
     setIsLoaded(true);
@@ -36,9 +41,10 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
   };
 
   const responseInvit = async (id, statut, action) => {
-    await setInvit(id, statut);
+    const invit = await setInvit(id, statut);
     await loadInvits();
     showToast(action);
+    if (appendGroup) appendGroup(invit.group);
   };
 
   const showToast = (action) => {
@@ -81,8 +87,9 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
   const initSocket = async () => {
     const socket = await getSocket();
     setSocketState(socket);
-
+    console.log("setup socket");
     socket.on("invite", () => {
+      console.log("new invite");
       Toast.show({
         type: "info",
         text1: "Vous avez reçu une nouvelle invitation",
@@ -98,6 +105,7 @@ export const Invitation = ({ visible, hideModal, setHasNotification }) => {
 
     return () => {
       if (socketState) {
+        console.log("closesocket");
         socketState.off("invite");
       }
     };

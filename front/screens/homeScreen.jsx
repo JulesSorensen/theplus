@@ -5,7 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { Chat } from "../components/Chat";
 import { SideBar } from "../components/Sidebar";
@@ -55,11 +55,15 @@ const HomeScreen = () => {
     }
   };
 
+  const appendGroup = (group) => {
+    setGroups([...groups, group]);
+  };
+
   const openGroupChat = (group) => {
     navigation.navigate("GroupChat", {
       groupName: group.name,
       groupId: group.id,
-      groupUsers: JSON.stringify(group.groupsUsers)
+      groupUsers: JSON.stringify(group.groupsUsers),
     });
   };
 
@@ -85,7 +89,12 @@ const HomeScreen = () => {
           openGroupChat={openGroupChat}
         />
 
-        <Chat title={"Chat global"} user={user} navigation={navigation} />
+        <Chat
+          title={"Chat global"}
+          user={user}
+          navigation={navigation}
+          appendGroup={appendGroup}
+        />
       </View>
     </SafeAreaView>
   );

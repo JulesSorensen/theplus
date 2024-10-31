@@ -64,7 +64,7 @@ export class MessagesService {
     msg.user = {
       ...msg.user,
       hashedName: sha256(msg.user.name),
-    }
+    };
 
     return msg;
   }
@@ -114,14 +114,14 @@ export class MessagesService {
     const updatedMsg = {
       ...msg,
       content: updateMessageDto.content,
-    }
+    };
 
     await this.messageRepository.save(updatedMsg);
     let members: Partial<User[]> | any | undefined = undefined;
     if (msg.group?.id) {
       members = msg.group.groupsUsers.map((gu) => ({ id: gu.user.id }));
     }
-    this.messagesGateway.sendMessage(msg, members, false);
+    this.messagesGateway.sendMessage(msg, members, true);
 
     return updatedMsg;
   }

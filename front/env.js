@@ -1,3 +1,3 @@
 export default {
-    API_URL : "https://buzzard-chief-eminently.ngrok-free.app"
-}
+  API_URL: "http://10.0.10.74:3000",
+};

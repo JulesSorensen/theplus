@@ -58,7 +58,12 @@ export class MessagesService {
   async findOne(id: number) {
     const msg = await this.messageRepository.findOne({
       where: { id },
-      relations: ["user", "group", "group.groupsUsers"],
+      relations: [
+        "user",
+        "group",
+        "group.groupsUsers",
+        "group.groupsUsers.user",
+      ],
     });
 
     msg.user = {

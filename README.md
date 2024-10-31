@@ -6,15 +6,16 @@ Ce projet est une application mobile permettant de discuter avec tout les monde,
 
 Créez des groupes, échangez en temps réel !
 
-## Hébergement
-
-Ce projet est hébergé de façon locale
-
 ## Projets techniques
 
 ### Frontend
 
 Le frontend est réalisé en React Native (JS)
+
+Attention à définir les variables d'environnement dans `front/env.js` en fonction de l'hébergement du backend.
+
+Si hébergement local, veuillez y mettre la valeur `http://localhost:3000`.
+A noter que les sockets ne fonctionnent pas en HTTP.
 
 Pour lancer le projet :
 
@@ -43,6 +44,10 @@ npm run start:dev
 La base de données est en SQLite, voici les différentes tables :
 
 - users
+- messages
+- groups
+- group_users
+- invits
 
 Pour voir leur structure, voir le code en back-end via les fichiers `entity` au sein de chaque modules.
 

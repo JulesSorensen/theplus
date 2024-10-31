@@ -16,12 +16,10 @@ services:
             - 'traefik.http.routers.theplus-stg-https.entrypoints=websecure'
             - 'traefik.http.routers.theplus-stg-https.tls.certresolver=zideresolver'
             - 'traefik.http.routers.theplus-stg-https.service=theplus-stg'
-            - 'traefik.http.routers.theplus-stg-https.middlewares=stg-whitelist@docker'
 
             - 'traefik.http.routers.theplus-stg-http.rule=Host(`theplus-back.zide.fr`)'
             - 'traefik.http.routers.theplus-stg-http.entrypoints=web'
             - 'traefik.http.routers.theplus-stg-http.service=theplus-stg'
-            - 'traefik.http.routers.theplus-stg-http.middlewares=stg-whitelist@docker'
 
             - 'io.portainer.accesscontrol.teams=voxcel'
         networks:

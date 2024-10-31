@@ -9,7 +9,7 @@ const GroupChatScreen = () => {
   const { groupName, groupId, groupUsers } = route.params;
   const [user, setUser] = useState(null);
 
-  const parsedGroupUsers = JSON.parse(groupUsers);
+  const parsedGroupUsers = groupUsers ? JSON.parse(groupUsers) : [];
 
   const setupUser = async () => {
     const user = await getUser();

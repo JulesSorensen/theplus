@@ -4,7 +4,7 @@ import * as sha256 from "sha256";
 import { IUserInfos } from "src/decorators/user.decorator";
 import { Repository } from "typeorm";
 import { CreateGroupDto } from "./dto/group.dto";
-import { Group, GroupUser } from "./entities/Group.entity";
+import { Group, GroupUser } from "./entities/group.entity";
 
 @Injectable()
 export class GroupsService {

@@ -5,11 +5,8 @@ services:
         build:
             context: ./
             dockerfile: Dockerfile
-        container_name: theplus-back
-        image: prd-theplus
+        container_name: theplus
         restart: unless-stopped
-        volumes:
-            - ./src:/app/src/
         labels:
             - 'traefik.enable=true'
             - 'traefik.docker.network=zide-traefik-n'

@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+    server:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        container_name: theplus-back
+        image: prd-theplus
+        restart: unless-stopped
+        volumes:
+            - ./src:/app/src/
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.docker.network=zide-traefik-n'
+            - 'traefik.http.services.theplus-stg.loadbalancer.server.port=3000'
+
+            - 'traefik.http.routers.theplus-stg-https.rule=Host(`theplus-back.zide.fr`)'
+            - 'traefik.http.routers.theplus-stg-https.entrypoints=websecure'
+            - 'traefik.http.routers.theplus-stg-https.tls.certresolver=zideresolver'
+            - 'traefik.http.routers.theplus-stg-https.service=theplus-stg'
+            - 'traefik.http.routers.theplus-stg-https.middlewares=stg-whitelist@docker'
+
+            - 'traefik.http.routers.theplus-stg-http.rule=Host(`theplus-back.zide.fr`)'
+            - 'traefik.http.routers.theplus-stg-http.entrypoints=web'
+            - 'traefik.http.routers.theplus-stg-http.service=theplus-stg'
+            - 'traefik.http.routers.theplus-stg-http.middlewares=stg-whitelist@docker'
+
+            - 'io.portainer.accesscontrol.teams=voxcel'
+        networks:
+          - zide-traefik-n
+
+networks:
+  zide-traefik-n:
+    external: true
